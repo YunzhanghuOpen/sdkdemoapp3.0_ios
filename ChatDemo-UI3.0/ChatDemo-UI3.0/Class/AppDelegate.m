@@ -26,7 +26,7 @@
 @end
 
 
-#define EaseMobAppKey   @"easemob-demo#chatdemoui"
+#define EaseMobAppKey   @"easemob-demo#chatdemoui" //yltapp#baiqiang //easemob-demo#chatdemoui
 
 @implementation AppDelegate
 
@@ -69,7 +69,7 @@
     NSString *appkey = [ud stringForKey:@"identifier_appkey"];
     if (!appkey)
     {
-        appkey = @"easemob-demo#chatdemoui";
+        appkey = EaseMobAppKey;
         [ud setObject:appkey forKey:@"identifier_appkey"];
     }
     [self easemobApplication:application

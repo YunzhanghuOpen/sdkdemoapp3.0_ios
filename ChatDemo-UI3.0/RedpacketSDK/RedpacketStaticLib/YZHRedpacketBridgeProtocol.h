@@ -9,6 +9,11 @@
 #ifndef YZHRedpacketBridgeProtocol_h
 #define YZHRedpacketBridgeProtocol_h
 
+#pragma mark - huawei change
+//  如果成功就传值，如果失败就传nil
+typedef void(^updateDkeyAndSessionIDBlock)(NSString *dKey, NSString *sessionID, NSError *error);
+
+#pragma mark - huawei end
 
 @class RedpacketUserInfo;
 
@@ -38,6 +43,9 @@
     错误码： 1001 Token相关错误
  */
 - (void)redpacketError:(NSString *)error withErrorCode:(NSInteger)code;
+
+//  更新Dkey 和 sessionID的回调 （请尽量保证成功）
+- (void)redpacketUpdateDkeyAndSessionID:(updateDkeyAndSessionIDBlock)updateBlock;
 
 @end
 

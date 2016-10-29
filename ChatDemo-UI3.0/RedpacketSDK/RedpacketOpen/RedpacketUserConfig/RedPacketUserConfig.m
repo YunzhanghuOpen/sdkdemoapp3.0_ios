@@ -271,7 +271,6 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
                 
                 ConversationListController *listVC = [((AppDelegate *)[UIApplication sharedApplication].delegate).mainController.viewControllers objectAtIndex:0];
                 [listVC refreshDataSource];
-                
                 break;
             }
         }

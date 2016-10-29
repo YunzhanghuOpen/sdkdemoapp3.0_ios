@@ -10,6 +10,20 @@
 #import "YZHRedpacketBridgeProtocol.h"
 
 
+@interface RPThirdPayMentInfo : NSObject
+
+@property (nonatomic, copy) NSString *weChatPayID;
+@property (nonatomic, copy) NSString *dKey;
+@property (nonatomic, copy) NSString *sessionID;
+@property (nonatomic, copy) NSString *imei;
+
++ (RPThirdPayMentInfo *)payInfoWithDKey:(NSString *)dKey
+                            sessionID:(NSString *)sessionID
+                                andImei:(NSString *)imei;
+
+
+@end
+
 @interface YZHRedpacketBridge : NSObject
 
 @property (nonatomic, weak) id <YZHRedpacketBridgeDelegate> delegate;
@@ -25,6 +39,13 @@
  *  支付宝回调当前APP时的URL Scheme, 默认为当前App的Bundle Identifier
  */
 @property (nonatomic, copy)  NSString *redacketURLScheme;
+
+
+/**
+ *  第三方支付信息
+ */
+@property (nonatomic, strong) RPThirdPayMentInfo *payMentInfo;
+
 
 + (YZHRedpacketBridge *)sharedBridge;
 
@@ -50,7 +71,7 @@
 @interface YZHRedpacketBridge (SignMethod)
 
 /**
- *  判断是否需要调用configWithSign:partner:appUserId:timestamp
+ *  签名无需每次都要请求，请求前请先调用下列方法判断是否需要更新签名
  */
 - (BOOL)isNeedUpdateSignWithUserId:(NSString *)userId;
 

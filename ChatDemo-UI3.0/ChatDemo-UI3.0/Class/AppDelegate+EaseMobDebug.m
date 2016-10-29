@@ -27,7 +27,7 @@
         NSString *appkey = [ud stringForKey:@"identifier_appkey"];
         if (!appkey)
         {
-            appkey = @"easemob-demo#chatdemoui";
+            appkey = @"yltapp#baiqiang";
             [ud setObject:appkey forKey:@"identifier_appkey"];
         }
         NSString *imServer = [ud stringForKey:@"identifier_imserver"];

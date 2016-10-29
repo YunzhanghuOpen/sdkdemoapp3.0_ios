@@ -170,7 +170,6 @@ EaseMessageViewControllerDataSource,RedpacketViewControlDelegate>
         }
         cell.model = messageModel;
         return cell;
-
     }
     
     RedpacketMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([RedpacketMessageCell class])];

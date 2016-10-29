@@ -1,9 +1,13 @@
-
+ChatDemo-UI3.0/Podfile.lock
 .gitignore
 ChatDemo-UI3.0/ChatDemo-UI3.0.xcodeproj/project.xcworkspace
 xcuserdata
-
 #RedpacketIgnore
 ChatDemo-UI3.0/export/
 ChatDemo-UI3.0/ChatDemo-UI3.0/export/
 ChatDemo-UI3.0/EaseMobSDK/
+ChatDemo-UI3.0/Tmp/
+ChatDemo-UI3.0/Pods/
+ChatDemo-UI3.0/ChatDemo-UI3.0.xcworkspace/contents.xcworkspacedata
+ChatDemo-UI3.0/ChatDemo-UI3.0.xcodeproj/project.pbxproj
+ChatDemo-UI3.0/ChatDemo-UI3.0.xcodeproj/project.pbxproj
