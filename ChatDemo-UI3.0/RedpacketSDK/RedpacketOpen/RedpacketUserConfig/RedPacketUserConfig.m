@@ -11,11 +11,15 @@
 #import "YZHRedpacketBridge.h"
 #import "RedpacketMessageModel.h"
 #import "ChatDemoHelper.h"
+//#import "WXApi.h"
 
 /**
  *  环信IMToken过期
  */
 #define RedpacketEaseMobTokenOutDate  20304
+
+/** 微信支付ID */
+#define WechatPayAppID      @"wx634a5f53be1b66bd"
 
 
 static RedPacketUserConfig *__sharedConfig__ = nil;
@@ -26,9 +30,6 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
                                     YZHRedpacketBridgeDelegate>
 {
     NSString *_dealerAppKey;
-    
-    NSString *_imUserId;
-    NSString *_imUserPass;
     /**
      *  是否已经注册了消息代理
      */
@@ -38,17 +39,6 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 @end
 
 @implementation RedPacketUserConfig
-
-- (void)beginObserve
-{
-    //  登录代理
-    [[EMClient sharedClient] removeDelegate:self];
-    [[EMClient sharedClient] addDelegate:self delegateQueue:nil];
-    
-    //  如果接入的用户有通知，则接收通知
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userLoginChanged:) name:KNOTIFICATION_LOGINCHANGE object:nil];
-}
 
 - (void)beginObserveMessage
 {
@@ -63,8 +53,6 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 {
     _isRegeistMessageDelegate = NO;
     [[EMClient sharedClient].chatManager removeDelegate:self];
-    [[EMClient sharedClient] removeDelegate:self];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)dealloc
@@ -82,9 +70,12 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
         [YZHRedpacketBridge sharedBridge].delegate = __sharedConfig__;
         [YZHRedpacketBridge sharedBridge].isDebug = YES;
         
-        [__sharedConfig__ beginObserve];
+        //  注册微信支付服务
+        //[WXApi registerApp:WechatPayAppID withDescription:@"RedpacketSDK-iOS"];
+        
     });
     
+    //  为了保证消息通知被注册
     [__sharedConfig__ beginObserveMessage];
     
     return __sharedConfig__;
@@ -115,40 +106,10 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 
 #pragma mark - YZHRedpacketBridgeDelegate
 
-- (void)redpacketError:(NSString *)error withErrorCode:(NSInteger)code
+- (void)redpacketFetchRegisitParam:(FetchRegisitParamBlock)fetchBlock withError:(NSError *)error
 {
-    if (code == RedpacketEaseMobTokenOutDate) {
-        //  环信IMToken 过期
-        [self configUserToken:YES];
-    }
-}
-
-#pragma mark - 
-#pragma mark 用户登录状态监控
-
-//  监测用户登录状态
-- (void)userLoginChanged:(NSNotification *)notifaction
-{
-    BOOL isLoginSuccess = [[notifaction object] boolValue];
-    if (isLoginSuccess) {
-        [self configUserToken:NO];
-    }
-}
-
-- (void)didAutoLoginWithError:(EMError *)aError
-{
-    if (!aError) {
-        [self configUserToken:NO];
-    }
-}
-
-- (void)configUserToken:(BOOL)isRefresh
-{
-    if (![EMClient sharedClient].isLoggedIn) {
-        return;
-    }
-    
     NSString *userToken = nil;
+    BOOL isRefresh = error == nil ? NO : YES;
     EMClient *client = [EMClient sharedClient];
     SEL selector = NSSelectorFromString(@"getUserToken:");
     if ([client respondsToSelector:selector]) {
@@ -156,21 +117,20 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
         NSString *(*func)(id, SEL, NSNumber *) = (void *)imp;
         userToken = func(client, selector, @(isRefresh));
     }
-    /*
-    if ([[EMClient sharedClient] respondsToSelector:@selector(getUserToken:)]) {
-        userToken = [[EMClient sharedClient] performSelector:@selector(getUserToken:) withObject:@(isRefresh)];
-    }
-    */
     
-    NSString *userId = self.redpacketUserInfo.userId;
     if (userToken.length) {
-        [[YZHRedpacketBridge sharedBridge] configWithAppKey:_dealerAppKey
-                                                  appUserId:userId
-                                                    imToken:userToken];
+        
+        NSString *userId = self.redpacketUserInfo.userId;
+        RedpacketRegisitModel *model = [RedpacketRegisitModel easeModelWithAppKey:_dealerAppKey appToken:userToken andAppUserId:userId];
+        fetchBlock(model);
+        
+    }else {
+        
+        fetchBlock(nil);
+    
     }
 }
 
-#pragma mark -
 #pragma mark  红包被抢消息监控
 
 - (void)didReceiveMessages:(NSArray *)aMessages

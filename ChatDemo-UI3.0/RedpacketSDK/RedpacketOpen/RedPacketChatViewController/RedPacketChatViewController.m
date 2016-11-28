@@ -17,7 +17,7 @@
 #import "ChatDemoHelper.h"
 #import "UserProfileManager.h"
 #import "TransferCell.h"
-#import <UIImageView+WebCache.h>
+#import "UIImageView+EMWebCache.h"
 
 /**
  *  红包聊天窗口
@@ -32,6 +32,11 @@ EaseMessageViewControllerDataSource, RedpacketViewControlDelegate>
 @end
 
 @implementation RedPacketChatViewController
+
+- (void)dealloc
+{
+    
+}
 
 - (void)viewDidLoad
 {
@@ -256,7 +261,6 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
             [self.viewControl presentTransferViewControllerWithReceiver:userInfo];
         }
         
-        
     }else{
         //群内指向红包
         NSArray *groupArray = [EMGroup groupWithId:self.conversation.conversationId].occupants;
@@ -348,11 +352,10 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
     if ([RedpacketMessageModel isRedpacket:dict]) {
         [self.viewControl redpacketCellTouchedWithMessageModel:[self toRedpacketMessageModel:model]];
         
-    }else if([RedpacketMessageModel isRedpacketTransferMessage:dict])
-    {
+    }else if([RedpacketMessageModel isRedpacketTransferMessage:dict]){
         [self.viewControl presentTransferDetailViewController:[RedpacketMessageModel redpacketMessageModelWithDic:dict]];
-    }
-    else {
+        
+    }else {
         [super messageCellSelected:model];
     }
 }
@@ -364,8 +367,8 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
     if (isGroup) {
         messageModel.redpacketSender = [self profileEntityWith:model.message.from];
         messageModel.toRedpacketReceiver = [self profileEntityWith:messageModel.toRedpacketReceiver.userId];
-    }else
-    {
+        
+    }else{
         messageModel.redpacketSender = [self profileEntityWith:model.message.from];
     }
     return messageModel;
