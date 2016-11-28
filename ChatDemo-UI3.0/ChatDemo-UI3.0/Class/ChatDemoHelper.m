@@ -679,7 +679,7 @@ static ChatDemoHelper *helper = nil;
 {
     if (_callSession) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            EMError *error = [[EMClient sharedClient].callManager answerCall:_callSession.sessionId];
+            EMError *error = [[EMClient sharedClient].callManager answerIncomingCall:_callSession.sessionId];
             if (error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (error.code == EMErrorNetworkUnavailable) {
