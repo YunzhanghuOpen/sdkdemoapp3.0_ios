@@ -27,6 +27,7 @@
     if (self) {
         self.hasRead.hidden = YES;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
+        [self.bubbleView.backgroundImageView addSubview: self.redpacketView];
     }
     
     return self;
@@ -88,13 +89,6 @@
     [_redpacketView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext] andRedpacketDic:model.message.ext];
     _hasRead.hidden = YES;//红包消息不显示已读
     _nameLabel = nil;// 不显示姓名
-}
-
-- (void)layoutSubviews
-{
-    [super layoutSubviews];
-    
-    [self.bubbleView.backgroundImageView addSubview: self.redpacketView];
 }
 
 - (RedpacketView *)redpacketView
