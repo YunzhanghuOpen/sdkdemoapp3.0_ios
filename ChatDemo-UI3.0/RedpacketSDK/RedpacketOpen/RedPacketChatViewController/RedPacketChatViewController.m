@@ -16,7 +16,6 @@
 #import "YZHRedpacketBridge.h"
 #import "ChatDemoHelper.h"
 #import "UserProfileManager.h"
-#import "TransferCell.h"
 #import "UIImageView+EMWebCache.h"
 
 /**
@@ -79,9 +78,6 @@ EaseMessageViewControllerDataSource, RedpacketViewControlDelegate>
     [[EaseRedBagCell appearance] setAvatarSize:40.f];
     //  设置头像圆角
     [[EaseRedBagCell appearance] setAvatarCornerRadius:20.f];
-    
-    [[TransferCell appearance] setAvatarSize:40.0f];
-    [[TransferCell appearance] setAvatarCornerRadius:20.0f];
     
     self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor whiteColor],NSFontAttributeName : [UIFont systemFontOfSize:18]};
     
@@ -182,7 +178,7 @@ EaseMessageViewControllerDataSource, RedpacketViewControlDelegate>
         /**
          *  红包相关的展示
          */
-        if ([RedpacketMessageModel isRedpacket:ext]) {
+        if ([RedpacketMessageModel isRedpacket:ext] || [RedpacketMessageModel isRedpacketTransferMessage:ext]) {
             EaseRedBagCell *cell = [tableView dequeueReusableCellWithIdentifier:[EaseRedBagCell cellIdentifierWithModel:messageModel]];
             
             if (!cell) {
@@ -194,16 +190,7 @@ EaseMessageViewControllerDataSource, RedpacketViewControlDelegate>
             
             return cell;
             
-        }else if ([RedpacketMessageModel isRedpacketTransferMessage:ext]) {
-            TransferCell *cell = [tableView dequeueReusableCellWithIdentifier:[TransferCell cellIdentifierWithModel:messageModel]];
-            if (!cell) {
-                cell = [[TransferCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:[TransferCell cellIdentifierWithModel:messageModel] model:messageModel];
-                cell.delegate = self;
-            }
-            cell.model = messageModel;
-            return cell;
-            
-        } else {
+        }else {
             RedpacketMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([RedpacketMessageCell class])];
             cell.model = messageModel;
             
@@ -222,9 +209,6 @@ EaseMessageViewControllerDataSource, RedpacketViewControlDelegate>
     
     if ([RedpacketMessageModel isRedpacket:ext])    {
         return [EaseRedBagCell cellHeightWithModel:messageModel];
-    }else if([RedpacketMessageModel isRedpacketTransferMessage:ext])
-    {
-        return [TransferCell cellHeightWithModel:messageModel];
     }else if ([RedpacketMessageModel isRedpacketTakenMessage:ext]) {
         return 36;
     }
