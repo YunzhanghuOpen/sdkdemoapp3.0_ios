@@ -18,10 +18,6 @@
  */
 #define RedpacketEaseMobTokenOutDate  20304
 
-/** 微信支付ID */
-#define WechatPayAppID      @"wx634a5f53be1b66bd"
-
-
 static RedPacketUserConfig *__sharedConfig__ = nil;
 
 @interface RedPacketUserConfig () <EMClientDelegate,
@@ -65,19 +61,12 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         __sharedConfig__ = [[RedPacketUserConfig alloc] init];
-        
         [YZHRedpacketBridge sharedBridge].dataSource = __sharedConfig__;
         [YZHRedpacketBridge sharedBridge].delegate = __sharedConfig__;
         [YZHRedpacketBridge sharedBridge].isDebug = YES;
-        
-        //  注册微信支付服务
-        //[WXApi registerApp:WechatPayAppID withDescription:@"RedpacketSDK-iOS"];
-        
     });
-    
     //  为了保证消息通知被注册
     [__sharedConfig__ beginObserveMessage];
-    
     return __sharedConfig__;
 }
 
@@ -117,17 +106,12 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
         NSString *(*func)(id, SEL, NSNumber *) = (void *)imp;
         userToken = func(client, selector, @(isRefresh));
     }
-    
     if (userToken.length) {
-        
         NSString *userId = self.redpacketUserInfo.userId;
         RedpacketRegisitModel *model = [RedpacketRegisitModel easeModelWithAppKey:_dealerAppKey appToken:userToken andAppUserId:userId];
         fetchBlock(model);
-        
     }else {
-        
         fetchBlock(nil);
-    
     }
 }
 
@@ -159,9 +143,7 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
             NSString *senderID = [dict valueForKey:RedpacketKeyRedpacketSenderId];
             NSString *currentUserID = [EMClient sharedClient].currentUsername;
             BOOL isSender = [senderID isEqualToString:currentUserID];
-            
             NSString *text;
-            
             /**
              *  当前用户是红包发送者。
              */
@@ -170,9 +152,7 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
                 if (receiver.length == 0) {
                     receiver = [dict valueForKey:RedpacketKeyRedpacketReceiverId];
                 }
-                
                 text = [NSString stringWithFormat:@"%@领取了你的红包",receiver];
-                
             }else if ([RedpacketMessageModel isRedpacketTransferMessage:message.ext]) {
                 /**
                  *  转账且不是转账发送方，则需要修改文案
@@ -181,7 +161,6 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
                     text = [NSString stringWithFormat:@"[转账]向你转账%@元", [dict valueForKey:RedpacketKeyRedpacketTransferAmout]];
                 }
             }
-            
             if (text && text.length > 0) {
                 EMTextMessageBody *body = [[EMTextMessageBody alloc] initWithText:text];
                 message.body = body;
@@ -207,7 +186,6 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
             NSString *receiverID = [dict valueForKey:RedpacketKeyRedpacketReceiverId];
             NSString *currentUserID = [EMClient sharedClient].currentUsername;
             NSString *conversationId = [message.ext valueForKey:RedpacketKeyRedpacketCmdToGroup];
-            
             if ([senderID isEqualToString:currentUserID]){
                 /**
                  *  当前用户是红包发送者
@@ -220,12 +198,10 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
                 EMMessage *textMessage = [[EMMessage alloc] initWithConversationID:conversationId from:message.from to:conversationId body:body1 ext:message.ext];
                 textMessage.chatType = EMChatTypeGroupChat;
                 textMessage.isRead = YES;
-
                 /**
                  *  更新界面
                  */
                 BOOL isCurrentConversation = [self.chatVC.conversation.conversationId isEqualToString:conversationId];
-                
                 if (self.chatVC && isCurrentConversation){
                     /**
                      *  刷新当前聊天界面
@@ -235,7 +211,6 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
                      *  存入当前会话并存入数据库
                      */
                     [self.chatVC.conversation insertMessage:textMessage error:nil];
-                    
                 }else {
                     /**
                      *  插入数据库
@@ -248,9 +223,7 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
                                 [conversation insertMessage:textMessage error:nil];
                             }
                         }
-                        
                         [listVc refresh];
-                        
                     }else {
                         [[EMClient sharedClient].chatManager importMessages:@[textMessage] completion:nil];
                     }
