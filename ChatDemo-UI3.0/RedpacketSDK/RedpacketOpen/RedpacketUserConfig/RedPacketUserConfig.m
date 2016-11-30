@@ -14,7 +14,6 @@
 #import "ConversationListController.h"
 
 
-
 static RedPacketUserConfig *__sharedConfig__ = nil;
 
 @interface RedPacketUserConfig () <IChatManagerDelegate,
@@ -30,22 +29,14 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 
 - (void)beginObserve
 {
-    /**
-     *  监听用户的登陆操作
-     */
+    /** 监听用户聊天 */
     [[EaseMob sharedInstance].chatManager removeDelegate:self];
     [[EaseMob sharedInstance].chatManager addDelegate:self delegateQueue:nil];
-    
-    /**
-     *  检测切换用户的操做
-     */
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userLoginChanged:) name:KNOTIFICATION_LOGINCHANGE object:nil];
 }
 
 - (void)removeObserver
 {
     [[EaseMob sharedInstance].chatManager removeDelegate:self];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)dealloc
@@ -58,24 +49,19 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         __sharedConfig__ = [[RedPacketUserConfig alloc] init];
-        
         [YZHRedpacketBridge sharedBridge].dataSource = __sharedConfig__;
         [YZHRedpacketBridge sharedBridge].delegate = __sharedConfig__;
         [YZHRedpacketBridge sharedBridge].isDebug = YES;
-        
     });
-    
     return __sharedConfig__;
 }
 
 - (instancetype)init
 {
     self = [super init];
-    
     if (self) {
         [self beginObserve];
     }
-    
     return self;
 }
 
@@ -85,92 +71,41 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 }
 
 #pragma mark - YZHRedpacketBridgeDataSource
-
-/**
- *  获取当前用户登陆信息，YZHRedpacketBridgeDataSource
- */
+/** 获取当前用户登陆信息，YZHRedpacketBridgeDataSource */
 - (RedpacketUserInfo *)redpacketUserInfo
 {
     RedpacketUserInfo *userInfo = [RedpacketUserInfo new];
     NSDictionary *userInfoDic = [[[EaseMob sharedInstance] chatManager] loginInfo];
     NSString *userId = [userInfoDic objectForKey:kSDKUsername];
     userInfo.userId = userId;
-    
     UserProfileEntity *entity = [[UserProfileManager sharedInstance] getCurUserProfile];
     NSString *nickname = [entity.nickname stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     userInfo.userNickname = nickname.length > 0 ? nickname : userId;
     userInfo.userAvatar = entity.imageUrl;;
-    
     return userInfo;
 }
 
-//  配置红包相关的服务
-- (void)configRedpacketService
+#pragma mark - YZHRedpacketBridgeDelegate
+- (void)redpacketFetchRegisitParam:(FetchRegisitParamBlock)fetchBlock withError:(NSError *)error;
 {
     NSDictionary *userInfo = [[[EaseMob sharedInstance] chatManager] loginInfo];
     NSString *userId = [userInfo objectForKey:kSDKUsername];
     NSString *userToken = [userInfo objectForKey:kSDKToken];
-    
     if (_dealerAppKey.length == 0) {
         NSLog(@"请先配置商户ID");
         return;
-        
     }else if (userToken.length == 0) {
         NSLog(@"用户还未登录");
         return;
     }
-    
-    [[YZHRedpacketBridge sharedBridge] configWithAppKey:_dealerAppKey appUserId:userId imToken:userToken];
-}
-
-#pragma mark - YZHRedpacketBridgeDelegate
-
-- (void)redpacketError:(NSString *)errorStr withErrorCode:(NSInteger)code
-{
-    NSLog(@"获取RedpacketTokenFalied:%@", errorStr);
-    if (code == 20304) {
-        //  20304 环信Token验证问题
-        //  刷新环信Token
-        EaseMob *easemob = [EaseMob sharedInstance];
-        EMError *error = nil;
-        
-        SEL selector = NSSelectorFromString(@"fetchTokenFromServer");
-        IMP imp = [easemob methodForSelector:selector];
-        EMError *(*func)(id, SEL) = (void *)imp;
-        error = func(easemob, selector);
-    }
-    
-    [self configRedpacketService];
-}
-
-#pragma mark - IChatManagerDelegate
-
-/**
- *  检测用户登陆状态
- */
-- (void)userLoginChanged:(NSNotification *)notification
-{
-    BOOL isLoginSuccess = [notification.object boolValue];
-    
-    if(isLoginSuccess) {
-        [self configRedpacketService];
-        
-    }}
-
-/**
- *  自动登录状态监听
- */
-- (void)didAutoLoginWithInfo:(NSDictionary *)loginInfo error:(EMError *)error
-{
-    [self configRedpacketService];
+    RedpacketRegisitModel *model = [RedpacketRegisitModel easeModelWithAppKey:_dealerAppKey appToken:userToken andAppUserId:userId];
+    fetchBlock(model);
 }
 
 #pragma mark - HandleCmdMessage
 - (void)didReceiveOfflineCmdMessages:(NSArray *)offlineCmdMessages
 {
-    /**
-     *  收到红包被抢的
-     */
+    /** 收到红包被抢的 */
     for (EMMessage *message in offlineCmdMessages) {
         EMCommandMessageBody * body = (EMCommandMessageBody *)message.messageBodies[0];
         if ([body.action isEqualToString:RedpacketKeyRedapcketCmd]) {
@@ -181,11 +116,8 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 
 -(void)didReceiveCmdMessage:(EMMessage *)message
 {
-    /**
-     *  收到红包被抢的
-     */
+    /** 收到红包被抢的 */
     EMCommandMessageBody * body = (EMCommandMessageBody *)message.messageBodies[0];
-    
     if ([body.action isEqualToString:RedpacketKeyRedapcketCmd]) {
         [self handleCmdMessage:message];
     }
@@ -193,26 +125,19 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 
 - (void)handleCmdMessage:(EMMessage *)message
 {
-    /**
-     *  当前用户的用户ID
-     */
+    /** 当前用户的用户ID */
     NSString *currentUserId = [[[[EaseMob sharedInstance] chatManager] loginInfo] objectForKey:kSDKUsername];
     NSString *senderId = message.ext[RedpacketKeyRedpacketSenderId];
-    /**
-     *  为了兼容老版本传过来的Cmd消息，必须做一下判断
-     */
+    /**为了兼容老版本传过来的Cmd消息，必须做一下判断*/
     BOOL isRedpacketSender = [currentUserId isEqualToString:senderId];
-    
     if (!isRedpacketSender) {
         return;
     }
-    
     NSDictionary *dict = message.ext;
     NSString *receiver = [dict valueForKey:RedpacketKeyRedpacketReceiverNickname];
     if (receiver.length > 18) {
         receiver = [[receiver substringToIndex:18] stringByAppendingString:@"..."];
     }
-    
     NSString *conversationId = message.ext[RedpacketKeyRedpacketCmdToGroup];
     if (conversationId.length == 0) {
         conversationId = message.from;
@@ -227,30 +152,22 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
     redpacketGroupMessage.ext = message.ext;
     redpacketGroupMessage.deliveryState = eMessageDeliveryState_Delivered;
     redpacketGroupMessage.isRead = YES;
-    
-    /**
-     *  插入数据库，并更新当前聊天界面
-     */
+    /**插入数据库，并更新当前聊天界面*/
     [[EaseMob sharedInstance].chatManager insertMessagesToDB:@[redpacketGroupMessage] forChatter:conversationId append2Chat:YES];
 }
 
-/*-------为了兼容红包2.0版本--------*/
-
+/** 为了兼容红包2.0版本 */
 - (void)didReceiveMessage:(EMMessage *)message
 {
     NSDictionary *dict = message.ext;
-    
     NSString *text;
     if ([RedpacketMessageModel isRedpacketTakenMessage:dict]) {
-        
         NSString *receiver = [dict valueForKey:RedpacketKeyRedpacketReceiverNickname];
         if (receiver.length == 0) {
             receiver = [dict valueForKey:RedpacketKeyRedpacketReceiverId];
         }
         text = [NSString stringWithFormat:@"%@领取了你的红包", receiver];
-        
     }else if ([RedpacketMessageModel isRedpacketTransferMessage:message.ext]){
-        
         NSString *currentUserId = [[[[EaseMob sharedInstance] chatManager] loginInfo] objectForKey:kSDKUsername];
         NSString *senderId = message.ext[RedpacketKeyRedpacketSenderId];
         BOOL isRedpacketSender = [currentUserId isEqualToString:senderId];
@@ -261,17 +178,14 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
             text = [NSString stringWithFormat:@"[转账]向你转账%@元", [dict valueForKey:RedpacketKeyRedpacketTransferAmout]];;
         }
     }
-    
     if (text.length) {
         for (id body in message.messageBodies) {
             if ([body isKindOfClass:[EMTextMessageBody class]]) {
                 EMTextMessageBody *textBody = (EMTextMessageBody *)body;
                 textBody.text = text;
                 [message updateMessageBodiesToDB];
-                
                 ConversationListController *listVC = [((AppDelegate *)[UIApplication sharedApplication].delegate).mainController.viewControllers objectAtIndex:0];
                 [listVC refreshDataSource];
-                
                 break;
             }
         }
@@ -284,7 +198,6 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
     NSDictionary *dict = message.ext;
     NSString *currentUserId = [[[[EaseMob sharedInstance] chatManager] loginInfo] objectForKey:kSDKUsername];
     NSString *receiverId = [dict valueForKey:RedpacketKeyRedpacketReceiverId];
-    
     BOOL isReceiver = [receiverId isEqualToString:currentUserId];
     if (isReceiver) {
         NSString *sender = [dict valueForKey:RedpacketKeyRedpacketSenderNickname];
@@ -299,10 +212,8 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
         }
         text = [NSString stringWithFormat:@"%@领取了你的红包", receiver];
     }
-    
     return text;
 }
-
-/*--------兼容结束-----------------*/
+/** 兼容结束 */
 
 @end
