@@ -11,72 +11,27 @@
 
 @interface RedpacketRegisitModel : NSObject
 
-<<<<<<< HEAD
-@interface RPThirdPayMentInfo : NSObject
-
-@property (nonatomic, copy) NSString *weChatPayID;
-@property (nonatomic, copy) NSString *dKey;
-@property (nonatomic, copy) NSString *sessionID;
-@property (nonatomic, copy) NSString *imei;
-
-+ (RPThirdPayMentInfo *)payInfoWithDKey:(NSString *)dKey
-                            sessionID:(NSString *)sessionID
-                                andImei:(NSString *)imei;
-
-
-@end
-
-@interface YZHRedpacketBridge : NSObject
-
-@property (nonatomic, weak) id <YZHRedpacketBridgeDelegate> delegate;
-
-@property (nonatomic, weak) id <YZHRedpacketBridgeDataSource>dataSource;
-=======
 //  签名方式
 + (RedpacketRegisitModel *)signModelWithAppUserId:(NSString *)appUserId     //  App的用户ID
                                        signString:(NSString *)sign          //  当前用户的签名
                                           partner:(NSString *)partner       //  在云账户注册的合作者
                                      andTimeStamp:(NSString *)timeStamp;    //  签名的时间戳
->>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
 
 //  环信的方式
 + (RedpacketRegisitModel *)easeModelWithAppKey:(NSString *)appkey           //  环信的注册商户Key
                                       appToken:(NSString *)appToken         //  环信IM的Token
                                   andAppUserId:(NSString *)appUserId;       //  环信IM的用户ID
 
-<<<<<<< HEAD
-/**
- *  支付宝回调当前APP时的URL Scheme, 默认为当前App的Bundle Identifier
- */
-@property (nonatomic, copy)  NSString *redacketURLScheme;
-
-
-/**
- *  第三方支付信息
- */
-@property (nonatomic, strong) RPThirdPayMentInfo *payMentInfo;
-
-
-+ (YZHRedpacketBridge *)sharedBridge;
-=======
 //  容联云的方式
 + (RedpacketRegisitModel *)rongCloudModelWithAppId:(NSString *)appId        //  容联云的AppId
                                          appUserId:(NSString *)appUserId;   //  容联云的用户ID
->>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
 
 @end
 
 
 @interface YZHRedpacketBridge : NSObject
 
-<<<<<<< HEAD
-/**
- *  签名无需每次都要请求，请求前请先调用下列方法判断是否需要更新签名
- */
-- (BOOL)isNeedUpdateSignWithUserId:(NSString *)userId;
-=======
 @property (nonatomic, weak) id <YZHRedpacketBridgeDelegate> delegate;
->>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
 
 @property (nonatomic, weak) id <YZHRedpacketBridgeDataSource>dataSource;
 

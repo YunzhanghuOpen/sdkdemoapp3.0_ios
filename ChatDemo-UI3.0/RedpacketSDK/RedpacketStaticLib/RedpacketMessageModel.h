@@ -10,20 +10,12 @@
 #import "RedpacketOpenConst.h"
 
 typedef NS_ENUM(NSInteger, RedpacketMessageType) {
-<<<<<<< HEAD
-=======
-
->>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
     RedpacketMessageTypeRedpacket = 1001,           /***  红包消息*/
     RedpacketMessageTypeTedpacketTakenMessage,      /***  红包被抢的消息*/
     RedpacketMessageTypeTransfer                    /***  转账消息*/
 };
 
 typedef NS_ENUM(NSInteger, RedpacketType) {
-<<<<<<< HEAD
-=======
-    
->>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
     RedpacketTypeSingle = 2001,     /***  点对点红包*/
     RedpacketTypeGroup,             /***  群组红包 (暂时留存)*/
     RedpacketTypeRand,              /***  拼手气红包*/
@@ -31,12 +23,8 @@ typedef NS_ENUM(NSInteger, RedpacketType) {
     RedpacketTypeRandpri,           /***  拼手气普通显示（一般用于系统发放）*/
     RedpacketTypeMember,            /***  定向红包 （专属红包，目前支持一人）*/
     RedpacketTypeAdvertisement,     /***  广告红包*/
-<<<<<<< HEAD
-    RedpacketTransfer               /***  转账*/
-=======
     RedpacketTransfer,              /***  转账*/
     RedpacketTypeAmount             /***  小额随机红包*/
->>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
 };
 
 typedef NS_ENUM(NSInteger, RedpacketStatusType) {
@@ -44,11 +32,6 @@ typedef NS_ENUM(NSInteger, RedpacketStatusType) {
     RedpacketStatusTypeCanGrab = 0,         /***  红包可以抢*/
     RedpacketStatusTypeGrabFinish = 1,      /***  红包被抢完*/
     RedpacketStatusTypeOutDate = -1         /***  红包已过期*/
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
 };
 
 @interface RedpacketUserInfo : NSObject <NSCopying>

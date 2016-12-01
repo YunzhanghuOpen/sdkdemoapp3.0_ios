@@ -20,14 +20,9 @@ typedef NS_ENUM(NSInteger,RPSendRedPacketViewControllerType){
 @protocol RedpacketViewControlDelegate <NSObject>
 
 @optional
-<<<<<<< HEAD
-- (NSArray<RedpacketUserInfo *> *)groupMemberList __deprecated_msg("请用getGroupMemberListCompletionHandle：方法替换");
-//  获取定向红包中的群成员列表
-=======
 /**
  *  获取定向(专属)红包中的群成员列表
  */
->>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
 - (void)getGroupMemberListCompletionHandle:(void (^)(NSArray<RedpacketUserInfo *> * groupMemberList))completionHandle;
 
 /**
@@ -122,13 +117,7 @@ typedef void(^RedpacketSendBlock)(RedpacketMessageModel *model);
 
 /**
  *  弹出转账界面
- *
-<<<<<<< HEAD
- *  @param rpType 红包页面类型
- *  @param count  群红包群人数
-=======
  *  @param userInfo 红包页面类型
->>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
  */
 - (void)presentTransferViewControllerWithReceiver:(RedpacketUserInfo *)userInfo;
 
