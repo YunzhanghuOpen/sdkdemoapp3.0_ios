@@ -10,11 +10,15 @@
 #import "RedpacketOpenConst.h"
 #import "UIImageView+EMWebCache.h"
 #import "RedpacketView.h"
+#import "RedPacketLuckView.h"
+#import "RedpacketMessageModel.h"
 #import "RedpacketMessageModel.h"
 
 @interface EaseRedBagCell()
 
 @property (nonatomic, strong) RedpacketView *redpacketView;
+@property (nonatomic, strong) RedPacketLuckView *repacketLuckView;
+@property (nonatomic, strong) RedpacketMessageModel *redpacketMessageModel;
 
 @end
 
@@ -29,7 +33,12 @@
     if (self) {
         self.hasRead.hidden = YES;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
-        [self.bubbleView.backgroundImageView addSubview: self.redpacketView];
+        _redpacketMessageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
+        if (_redpacketMessageModel.redpacketType == RedpacketTypeAmount) {
+            [self.bubbleView.backgroundImageView addSubview:self.repacketLuckView];
+        }else {
+            [self.bubbleView.backgroundImageView addSubview: self.redpacketView];
+        }
     }
     
     return self;
@@ -44,9 +53,7 @@
 {
     if (model.avatarURLPath) {
         [self.avatarView sd_setImageWithURL:[NSURL URLWithString:model.avatarURLPath] placeholderImage:model.avatarImage];
-        
     } else {
-        
         self.avatarView.image = model.avatarImage;
     }
 }
@@ -61,11 +68,17 @@
     _bubbleView.translatesAutoresizingMaskIntoConstraints = YES;
     
     if (model.isSender) {
-        _bubbleView.frame = CGRectMake([UIScreen mainScreen].bounds.size.width - 273.5, 2, 213, 94);
-        
+        if (_redpacketMessageModel.redpacketType == RedpacketTypeAmount) {
+            _bubbleView.frame = CGRectMake([UIScreen mainScreen].bounds.size.width - 175, 8, 116, 140);
+        }else {
+            _bubbleView.frame = CGRectMake([UIScreen mainScreen].bounds.size.width - 273.5, 2, 213, 94);
+        }
     }else {
-        _bubbleView.frame = CGRectMake(55, 2, 213, 94);
-        
+        if (_redpacketMessageModel.redpacketType == RedpacketTypeAmount) {
+            _bubbleView.frame = CGRectMake(55, 8, 116, 140);
+        }else {
+            _bubbleView.frame = CGRectMake(55, 2, 213, 94);
+        }
     }
 }
 
@@ -76,14 +89,23 @@
 
 + (CGFloat)cellHeightWithModel:(id<IMessageModel>)model
 {
-    return [RedpacketView redpacketViewHeight] + 20;
+    RedpacketMessageModel *messageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
+    if (messageModel.redpacketType == RedpacketTypeAmount) {
+        return [RedPacketLuckView heightForRedpacketMessageCell] + 20;
+    }else {
+        return [RedpacketView redpacketViewHeight] + 20;
+    }
 }
 
 - (void)setModel:(id<IMessageModel>)model
 {
     [super setModel:model];
-    [_redpacketView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext]
-                                    andRedpacketDic:model.message.ext];
+    if (_redpacketMessageModel.redpacketType == RedpacketTypeAmount) {
+        [_repacketLuckView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext]];
+    }else {
+        [_redpacketView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext]
+                                        andRedpacketDic:model.message.ext];
+    }
     /** 红包消息不显示已读 */
     _hasRead.hidden = YES;
     /** 不显示姓名 */
@@ -96,6 +118,14 @@
         _redpacketView = [[RedpacketView alloc]init];
     }
     return _redpacketView;
+}
+
+- (RedPacketLuckView *)repacketLuckView
+{
+    if (!_repacketLuckView) {
+        _repacketLuckView = [[RedPacketLuckView alloc]init];
+    }
+    return _repacketLuckView;
 }
 
 @end

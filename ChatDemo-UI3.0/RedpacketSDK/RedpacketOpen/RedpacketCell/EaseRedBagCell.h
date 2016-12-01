@@ -11,7 +11,7 @@
 #import "EaseBaseMessageCell.h"
 
 
-/** 红包显示的Cell */
+/** 红包和转账的Cell */
 @interface EaseRedBagCell : EaseBaseMessageCell
 
 

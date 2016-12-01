@@ -57,8 +57,11 @@ static NSInteger const redpacketTransferIndex   = 7;
     __weak typeof(self) weakSelf = self;
     /** 用户抢红包和用户发送红包的回调 */
     [_viewControl setRedpacketGrabBlock:^(RedpacketMessageModel *messageModel) {
-        /** 发送通知到发送红包者处 */
-        [weakSelf sendRedpacketHasBeenTaked:messageModel];
+        /** 小额随机红包没有推送消息 */
+        if (messageModel.redpacketType != RedpacketTypeAmount) {
+            /** 发送通知到发送红包者处 */
+            [weakSelf sendRedpacketHasBeenTaked:messageModel];
+        }
     } andRedpacketBlock:^(RedpacketMessageModel *model) {
         /** 发送红包 */
         [weakSelf sendRedPacketMessage:model];
@@ -194,7 +197,7 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
     if (index == redpacketSendIndex || index == 3) {
         if (self.conversation.conversationType == eConversationTypeChat) {
             /** 单聊发送界面 */
-            [self.viewControl presentRedPacketViewControllerWithType:RPSendRedPacketViewControllerSingle memberCount:0];
+            [self.viewControl presentRedPacketViewControllerWithType:RPSendRedPacketViewControllerRand memberCount:0];
         }else {
             /** 群聊红包发送界面 */
             NSArray *groupArray = [EMGroup groupWithId:self.conversation.chatter].occupants;
