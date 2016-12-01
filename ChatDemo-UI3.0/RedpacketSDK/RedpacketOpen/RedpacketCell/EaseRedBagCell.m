@@ -70,7 +70,7 @@
     }else {
         _bubbleView.frame = CGRectMake(55, 2, 213, 94);
     }
-
+    
 }
 
 + (NSString *)cellIdentifierWithModel:(id<IMessageModel>)model
@@ -87,8 +87,10 @@
 {
     [super setModel:model];
     [_redpacketView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext] andRedpacketDic:model.message.ext];
-    _hasRead.hidden = YES;//红包消息不显示已读
-    _nameLabel = nil;// 不显示姓名
+    /** 红包消息不显示已读 */
+    _hasRead.hidden = YES;
+    /** 不显示姓名 */
+    _nameLabel = nil;
 }
 
 - (RedpacketView *)redpacketView
@@ -98,6 +100,5 @@
     }
     return _redpacketView;
 }
-
 
 @end

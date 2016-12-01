@@ -11,11 +11,8 @@
 #import "YZHRedpacketBridge.h"
 #import "RedpacketMessageModel.h"
 #import "ChatDemoHelper.h"
-//#import "WXApi.h"
 
-/**
- *  环信IMToken过期
- */
+/** 环信IMToken过期 */
 #define RedpacketEaseMobTokenOutDate  20304
 
 static RedPacketUserConfig *__sharedConfig__ = nil;
@@ -26,9 +23,7 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
                                     YZHRedpacketBridgeDelegate>
 {
     NSString *_dealerAppKey;
-    /**
-     *  是否已经注册了消息代理
-     */
+    /** 是否已经注册了消息代理 */
     BOOL _isRegeistMessageDelegate;
 }
 
@@ -40,7 +35,7 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 {
     if (!_isRegeistMessageDelegate && [EMClient sharedClient].chatManager) {
         _isRegeistMessageDelegate = YES;
-        //  消息代理
+        /** 消息代理 */
         [[EMClient sharedClient].chatManager addDelegate:self delegateQueue:nil];
     }
 }
@@ -65,7 +60,7 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
         [YZHRedpacketBridge sharedBridge].delegate = __sharedConfig__;
         [YZHRedpacketBridge sharedBridge].isDebug = YES;
     });
-    //  为了保证消息通知被注册
+    /** 为了保证消息通知被注册 */
     [__sharedConfig__ beginObserveMessage];
     return __sharedConfig__;
 }
@@ -76,25 +71,19 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 }
 
 #pragma mark - YZHRedpacketBridgeDataSource
-
-/**
- *  获取当前用户登陆信息，YZHRedpacketBridgeDataSource
- */
+/** 获取当前用户登陆信息，YZHRedpacketBridgeDataSource */
 - (RedpacketUserInfo *)redpacketUserInfo
 {
     RedpacketUserInfo *userInfo = [RedpacketUserInfo new];
     userInfo.userId = [EMClient sharedClient].currentUsername;
-    
     UserProfileEntity *entity = [[UserProfileManager sharedInstance] getCurUserProfile];
     NSString *nickname = entity.nickname;
     userInfo.userNickname = nickname.length > 0 ? nickname : userInfo.userId;
     userInfo.userAvatar = entity.imageUrl;;
-    
     return userInfo;
 }
 
 #pragma mark - YZHRedpacketBridgeDelegate
-
 - (void)redpacketFetchRegisitParam:(FetchRegisitParamBlock)fetchBlock withError:(NSError *)error
 {
     NSString *userToken = nil;
@@ -119,22 +108,16 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 
 - (void)didReceiveMessages:(NSArray *)aMessages
 {
-    /**
-     *  收到消息
-     */
+    /** 收到红包被抢的 */
     [self handleMessage:aMessages];
 }
 -(void)didReceiveCmdMessages:(NSArray *)aCmdMessages
 {
-    /**
-     *  处理红包被抢的消息
-     */
+    /** 收到红包被抢的消息 */
     [self handleCmdMessages:aCmdMessages];
 }
 
-/**
- *  点对点红包，红包被抢的消息
- */
+/** 点对点红包，红包被抢的消息 */
 - (void)handleMessage:(NSArray <EMMessage *> *)aMessages
 {
     for (EMMessage *message in aMessages) {
@@ -144,9 +127,7 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
             NSString *currentUserID = [EMClient sharedClient].currentUsername;
             BOOL isSender = [senderID isEqualToString:currentUserID];
             NSString *text;
-            /**
-             *  当前用户是红包发送者。
-             */
+            /** 当前用户是红包发送者 */
             if ([RedpacketMessageModel isRedpacketTakenMessage:dict] && isSender) {
                 NSString *receiver = [dict valueForKey:RedpacketKeyRedpacketReceiverNickname];
                 if (receiver.length == 0) {
@@ -154,9 +135,7 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
                 }
                 text = [NSString stringWithFormat:@"%@领取了你的红包",receiver];
             }else if ([RedpacketMessageModel isRedpacketTransferMessage:message.ext]) {
-                /**
-                 *  转账且不是转账发送方，则需要修改文案
-                 */
+                /** 转账且不是转账发送方，则需要修改文案 */
                 if (!isSender) {
                     text = [NSString stringWithFormat:@"[转账]向你转账%@元", [dict valueForKey:RedpacketKeyRedpacketTransferAmout]];
                 }
@@ -164,18 +143,14 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
             if (text && text.length > 0) {
                 EMTextMessageBody *body = [[EMTextMessageBody alloc] initWithText:text];
                 message.body = body;
-                /**
-                 *  把相应数据更新到数据库
-                 */
+                /** 把相应数据更新到数据库 */
                 [[EMClient sharedClient].chatManager updateMessage:message completion:nil];
             }
         }
     }
 }
 
-/**
- *  群红包，红包被抢的消息
- */
+/** 群红包，红包被抢的消息 */
 - (void)handleCmdMessages:(NSArray <EMMessage *> *)aCmdMessages
 {
     for (EMMessage *message in aCmdMessages) {
@@ -187,34 +162,21 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
             NSString *currentUserID = [EMClient sharedClient].currentUsername;
             NSString *conversationId = [message.ext valueForKey:RedpacketKeyRedpacketCmdToGroup];
             if ([senderID isEqualToString:currentUserID]){
-                /**
-                 *  当前用户是红包发送者
-                 */
+                /** 当前用户是红包发送者 */
                 NSString *text = [NSString stringWithFormat:@"%@领取了你的红包",receiverID];
-                /*
-                 NSString *willSendText = [EaseConvertToCommonEmoticonsHelper convertToCommonEmoticons:text];
-                 */
                 EMTextMessageBody *body1 = [[EMTextMessageBody alloc] initWithText:text];
                 EMMessage *textMessage = [[EMMessage alloc] initWithConversationID:conversationId from:message.from to:conversationId body:body1 ext:message.ext];
                 textMessage.chatType = EMChatTypeGroupChat;
                 textMessage.isRead = YES;
-                /**
-                 *  更新界面
-                 */
+                /** 更新界面 */
                 BOOL isCurrentConversation = [self.chatVC.conversation.conversationId isEqualToString:conversationId];
                 if (self.chatVC && isCurrentConversation){
-                    /**
-                     *  刷新当前聊天界面
-                     */
+                    /** 刷新当前聊天界面 */
                     [self.chatVC addMessageToDataSource:textMessage progress:nil];
-                    /**
-                     *  存入当前会话并存入数据库
-                     */
+                    /** 存入当前会话并存入数据库 */
                     [self.chatVC.conversation insertMessage:textMessage error:nil];
                 }else {
-                    /**
-                     *  插入数据库
-                     */
+                    /** 插入数据库 */
                     ConversationListController *listVc = [ChatDemoHelper shareHelper].conversationListVC;
                     if (listVc) {
                         for (id <IConversationModel> model in [listVc.dataArray copy]) {
