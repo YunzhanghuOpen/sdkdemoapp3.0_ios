@@ -7,6 +7,7 @@
 //
 
 #import "RedpacketView.h"
+#import "RedpacketDefines.h"
 
 #define RedpacketMessageFontSize     14
 #define RedpacketSubMessageFontSize  12
@@ -28,8 +29,6 @@
 #define RedpacketSubMessageText     NSLocalizedString(@"查看红包", @"查看红包")
 #define RedpacketTransferSeText     NSLocalizedString(@"对方已收到转账", @"对方已收到转账")
 #define RedpacketTransferReceText   NSLocalizedString(@"已收到对方转账", @"已收到对方转账")
-
-#define REDPACKETBUNDLE(name) [NSString stringWithFormat:@"RedpacketCellResource.bundle/%@", name]
 
 
 @implementation RedpacketView
@@ -108,13 +107,13 @@
     
     if (redpacketMessage.messageType == RedpacketMessageTypeTransfer) {
         imageName = isSender ? @"transfer_sender_bg" : @"transfer_receiver_bg";
-        icon = [UIImage imageNamed:REDPACKETBUNDLE(@"redPacket_transferIcon")];
+        icon = RedpacketImage(@"redPacket_transferIcon");
         title = redpacketMessage.isRedacketSender ? RedpacketTransferSeText : RedpacketTransferReceText;
         subTitle = [NSString stringWithFormat:@"%@元", redpacketDic[@"money_transfer_amount"]];
         orgTitle = RedpacketTransfer;
     }else {
         imageName = isSender ? @"redpacket_sender_bg" : @"redpacket_receiver_bg";
-        icon = [UIImage imageNamed:REDPACKETBUNDLE(@"redPacket_redPacktIcon")];
+        icon = RedpacketImage(@"redPacket_redPacktIcon");
         title = redpacketMessage.redpacket.redpacketGreeting;
         subTitle = RedpacketSubMessageText;
         orgTitle = redpacketMessage.redpacket.redpacketOrgName;
@@ -125,11 +124,13 @@
             self.typeLable.hidden = YES;
         }
     }
+    
     self.iconView.image = icon;
     self.greetingLabel.text = title;
     self.subLabel.text = subTitle;
     self.orgLabel.text = orgTitle;
-    UIImage *image = [UIImage imageNamed:REDPACKETBUNDLE(imageName)];
+    
+    UIImage *image = RedpacketImage(imageName);
     image = [image resizableImageWithCapInsets:RedpacketImageInset];
     self.bubbleBackgroundView.image = image;
     [self layoutSubviewsWithModel:redpacketMessage];

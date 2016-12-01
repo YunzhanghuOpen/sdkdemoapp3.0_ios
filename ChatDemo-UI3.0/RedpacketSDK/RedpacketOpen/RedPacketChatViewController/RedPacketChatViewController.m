@@ -16,14 +16,16 @@
 #import "RedpacketOpenConst.h"
 #import "YZHRedpacketBridge.h"
 #import "UserProfileManager.h"
+#import "RedpacketDefines.h"
+
 
 /** 红包单击事件索引 */
-static NSInteger const _redpacket_send_index   = 6;
+static NSInteger const redpacketSendIndex       = 6;
 
 /** 零钱单击事件索引 */
-static NSInteger const _redpacket_change_index = 7;
+static NSInteger const redpacketTransferIndex   = 7;
 
-/** 红包聊天窗口 */
+
 @interface RedPacketChatViewController () < EaseMessageCellDelegate,
                                             EaseMessageViewControllerDataSource,
                                             RedpacketViewControlDelegate>
@@ -40,14 +42,18 @@ static NSInteger const _redpacket_change_index = 7;
     
     /** 红包功能的控制器， 产生用户单击红包后的各种动作 */
     _viewControl = [[RedpacketViewControl alloc] init];
+    
     /** 需要当前的聊天窗口 */
     _viewControl.conversationController = self;
+    
     /** 群红包需要的返回成员列表 */
     _viewControl.delegate = self;
+    
     /** 需要当前聊天窗口的会话ID */
     RedpacketUserInfo *userInfo = [RedpacketUserInfo new];
     userInfo.userId = self.conversation.chatter;
     _viewControl.converstationInfo = userInfo;
+    
     __weak typeof(self) weakSelf = self;
     /** 用户抢红包和用户发送红包的回调 */
     [_viewControl setRedpacketGrabBlock:^(RedpacketMessageModel *messageModel) {
@@ -63,13 +69,20 @@ static NSInteger const _redpacket_change_index = 7;
     /** 设置头像圆角 */
     [[EaseRedBagCell appearance] setAvatarCornerRadius:20.f];
     
-    self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor whiteColor],NSFontAttributeName : [UIFont systemFontOfSize:18]};
+    self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor whiteColor],
+                                                                               NSFontAttributeName : [UIFont systemFontOfSize:18]};
+    
     if ([self.chatToolbar isKindOfClass:[EaseChatToolbar class]]) {
         /** 红包按钮 */
-        [self.chatBarMoreView insertItemWithImage:[UIImage imageNamed:@"RedpacketCellResource.bundle/redpacket_redpacket"] highlightedImage:[UIImage imageNamed:@"RedpacketCellResource.bundle/redpacket_redpacket_high"] title:@"红包"];
+        [self.chatBarMoreView insertItemWithImage:RedpacketImage(@"redpacket_redpacket")
+                                 highlightedImage:RedpacketImage(@"redpacket_redpacket_high")
+                                            title:@"红包"];
         /** 转账按钮 */
-        [self.chatBarMoreView insertItemWithImage:[UIImage imageNamed:@"RedPacketResource.bundle/redpacket_transfer_high"] highlightedImage:[UIImage imageNamed:@"RedPacketResource.bundle/redpacket_transfer_high"] title:@"转账"];
+        [self.chatBarMoreView insertItemWithImage:RedpacketImage(@"redpacket_transfer_high")
+                                 highlightedImage:RedpacketImage(@"redpacket_transfer_high")
+                                            title:@"转账"];
     }
+    
     /** 抢红包红包提示消息视图 */
     [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([RedpacketMessageCell class]) bundle:nil]forCellReuseIdentifier:NSStringFromClass([RedpacketMessageCell class])];
     
@@ -82,13 +95,16 @@ static NSInteger const _redpacket_change_index = 7;
     if ([object conformsToProtocol:NSProtocolFromString(@"IMessageModel")]) {
         id <IMessageModel> messageModel = object;
         NSDictionary *ext = messageModel.message.ext;
+        
         /** 如果是红包，则只显示删除按钮 */
         if ([RedpacketMessageModel isRedpacket:ext]) {
+            
             EaseMessageCell *cell = (EaseMessageCell *)[self.tableView cellForRowAtIndexPath:indexPath];
             [cell becomeFirstResponder];
             self.menuIndexPath = indexPath;
             [self showMenuViewController:cell.bubbleView andIndexPath:indexPath messageType:eMessageBodyType_Command];
             return NO;
+            
         }else if ([RedpacketMessageModel isRedpacketTakenMessage:ext]) {
             return NO;
         }
@@ -100,14 +116,19 @@ static NSInteger const _redpacket_change_index = 7;
 - (void)messageCellSelected:(id<IMessageModel>)model
 {
     NSDictionary *dict = model.message.ext;
+    
     if ([RedpacketMessageModel isRedpacket:dict]) {
+        
         [self.viewControl redpacketCellTouchedWithMessageModel:[self toRedpacketMessageModel:model]];
-    }else if([RedpacketMessageModel isRedpacketTransferMessage:dict])
-    {
+        
+    }else if([RedpacketMessageModel isRedpacketTransferMessage:dict]){
+        
         [self.viewControl presentTransferDetailViewController:[RedpacketMessageModel redpacketMessageModelWithDic:dict]];
-    }
-    else {
+        
+    }else {
+        
         [super messageCellSelected:model];
+        
     }
 }
 
@@ -116,6 +137,7 @@ static NSInteger const _redpacket_change_index = 7;
                        cellForMessageModel:(id<IMessageModel>)messageModel
 {
     NSDictionary *ext = messageModel.message.ext;
+    
     if ([RedpacketMessageModel isRedpacketRelatedMessage:ext]) {
         if ([RedpacketMessageModel isRedpacket:ext] || [RedpacketMessageModel isRedpacketTransferMessage:ext]) {
             EaseRedBagCell *cell = [tableView dequeueReusableCellWithIdentifier:[EaseRedBagCell cellIdentifierWithModel:messageModel]];
@@ -123,13 +145,17 @@ static NSInteger const _redpacket_change_index = 7;
                 cell = [[EaseRedBagCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:[EaseRedBagCell cellIdentifierWithModel:messageModel] model:messageModel];
                 cell.delegate = self;
             }
+            
             cell.model = messageModel;
             return cell;
         }
+        
         RedpacketMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([RedpacketMessageCell class])];
         cell.model = messageModel;
+        
         return cell;
     }
+    
     return [super messageViewController:tableView cellForMessageModel:messageModel];
 }
 
@@ -138,11 +164,14 @@ static NSInteger const _redpacket_change_index = 7;
                    withCellWidth:(CGFloat)cellWidth
 {
     NSDictionary *ext = messageModel.message.ext;
-    if ([RedpacketMessageModel isRedpacket:ext])    {
+    
+    if ([RedpacketMessageModel isRedpacket:ext] || [RedpacketMessageModel isRedpacketTransferMessage:ext])    {
         return [EaseRedBagCell cellHeightWithModel:messageModel];
+        
     }else if ([RedpacketMessageModel isRedpacketTakenMessage:ext]) {
         return 36;
     }
+    
     return [super messageViewController:viewController heightForMessageModel:messageModel withCellWidth:cellWidth];
 }
 
@@ -162,7 +191,7 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
 #pragma mark - 发送红包消息
 - (void)messageViewController:(EaseMessageViewController *)viewController didSelectMoreView:(EaseChatBarMoreView *)moreView AtIndex:(NSInteger)index
 {
-    if (index == _redpacket_send_index || index == 3) {
+    if (index == redpacketSendIndex || index == 3) {
         if (self.conversation.conversationType == eConversationTypeChat) {
             /** 单聊发送界面 */
             [self.viewControl presentRedPacketViewControllerWithType:RPSendRedPacketViewControllerSingle memberCount:0];
@@ -171,11 +200,12 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
             NSArray *groupArray = [EMGroup groupWithId:self.conversation.chatter].occupants;
             [self.viewControl presentRedPacketViewControllerWithType:RPSendRedPacketViewControllerMember memberCount:groupArray.count];
         }
-    } else if (index == _redpacket_change_index) {
+    } else if (index == redpacketTransferIndex) {
         /** 转账页面 */
         RedpacketUserInfo *userInfo = [RedpacketUserInfo new];
         userInfo = [self profileEntityWith:self.conversation.chatter];
         [self.viewControl presentTransferViewControllerWithReceiver:userInfo];
+        
     }else {
         [self.chatToolbar endEditing:YES];
     }
@@ -304,13 +334,16 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
     }
 }
 
-- (EMMessage *)cmdMessageBodyToTextMessageBody:(EMMessage *)message toReceiver:(NSString *)receiver
+- (EMMessage *)cmdMessageBodyToTextMessageBody:(EMMessage *)message
+                                    toReceiver:(NSString *)receiver
 {
     NSDictionary *dict = message.ext;
     NSString *receiverNick = [dict valueForKey:RedpacketKeyRedpacketReceiverNickname];
+    
     if (receiverNick.length > 18) {
         receiverNick = [[receiverNick substringToIndex:18] stringByAppendingString:@"..."];
     }
+    
     NSString *text = [NSString stringWithFormat:@"%@领取了你的红包",receiverNick];
     return [self createTextMessageWithText:text receiver:receiver andExt:message.ext];
 }

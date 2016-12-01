@@ -10,6 +10,7 @@
 #import "RedpacketOpenConst.h"
 #import "EaseMob.h"
 #import "RedpacketMessageModel.h"
+#import "RedpacketDefines.h"
 
 
 @interface RedpacketMessageCell ()
@@ -25,6 +26,7 @@
 @implementation RedpacketMessageCell
 
 - (void)awakeFromNib {
+    [super awakeFromNib];
     
     self.selectionStyle = UITableViewCellSelectionStyleNone;
     
@@ -32,20 +34,11 @@
     
     self.backView.layer.cornerRadius = 3.0f;
     self.backView.layer.masksToBounds = YES;
-    self.backView.backgroundColor = [self hexColor:0xe3e3e3];
-    [self.icon setImage:[UIImage imageNamed:@"RedpacketCellResource.bundle/redpacket_smallIcon"]];
+    self.backView.backgroundColor = rpHexColor(0xe3e3e3);
+    [self.icon setImage:RedpacketImage(@"redpacket_smallIcon")];
     
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(backViewTaped)];
     [self.backView addGestureRecognizer:tap];
-}
-
-- (UIColor *)hexColor:(uint)color
-{
-    float r = (color&0xFF0000) >> 16;
-    float g = (color&0xFF00) >> 8;
-    float b = (color&0xFF);
-    
-    return [UIColor colorWithRed:r/255.0f green:g/255.0f blue:b/255.0f alpha:1.0f];
 }
 
 - (void)setModel:(id<IMessageModel>)model
