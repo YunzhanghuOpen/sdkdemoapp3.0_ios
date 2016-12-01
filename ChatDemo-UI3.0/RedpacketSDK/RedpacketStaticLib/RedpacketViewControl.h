@@ -13,15 +13,31 @@
 typedef NS_ENUM(NSInteger,RPSendRedPacketViewControllerType){
     RPSendRedPacketViewControllerSingle, //点对点红包
     RPSendRedPacketViewControllerGroup,  //普通群红包
-    RPSendRedPacketViewControllerMember, //包含专属红包的群红包
+    RPSendRedPacketViewControllerMember, //专属红包（包含普通群红包功能）
+    RPSendRedPacketViewControllerRand,   //小额度随机红包
 };
 
 @protocol RedpacketViewControlDelegate <NSObject>
 
 @optional
+<<<<<<< HEAD
 - (NSArray<RedpacketUserInfo *> *)groupMemberList __deprecated_msg("请用getGroupMemberListCompletionHandle：方法替换");
 //  获取定向红包中的群成员列表
+=======
+/**
+ *  获取定向(专属)红包中的群成员列表
+ */
+>>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
 - (void)getGroupMemberListCompletionHandle:(void (^)(NSArray<RedpacketUserInfo *> * groupMemberList))completionHandle;
+
+/**
+ *  广告红包事件触发，需深度合作。具体请联系商务
+ *  客服热线: 400-6565-739
+ *  业务咨询: BD@yunzhanghu.com
+ */
+- (void)advertisementRedPacketAction:(NSDictionary *)args;
+
+- (NSArray<RedpacketUserInfo *> *)groupMemberList __deprecated_msg("请用getGroupMemberListCompletionHandle：方法替换");
 
 @end
 
@@ -29,7 +45,7 @@ typedef NS_ENUM(NSInteger,RPSendRedPacketViewControllerType){
 //  抢红包成功回调
 typedef void(^RedpacketGrabBlock)(RedpacketMessageModel *messageModel);
 
-//  环信接口发送红包消息回调
+//  接口发送红包消息回调
 typedef void(^RedpacketSendBlock)(RedpacketMessageModel *model);
 
 
@@ -107,8 +123,12 @@ typedef void(^RedpacketSendBlock)(RedpacketMessageModel *model);
 /**
  *  弹出转账界面
  *
+<<<<<<< HEAD
  *  @param rpType 红包页面类型
  *  @param count  群红包群人数
+=======
+ *  @param userInfo 红包页面类型
+>>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
  */
 - (void)presentTransferViewControllerWithReceiver:(RedpacketUserInfo *)userInfo;
 

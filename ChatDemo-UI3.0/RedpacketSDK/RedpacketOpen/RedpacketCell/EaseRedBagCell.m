@@ -8,10 +8,14 @@
 
 #import "EaseRedBagCell.h"
 #import "EaseBubbleView+RedPacket.h"
-#import "UIImageView+EMWebCache.h"
 #import "RedpacketOpenConst.h"
+#import "UIImageView+EMWebCache.h"
+#import "RedpacketView.h"
+#import "RedpacketMessageModel.h"
 
-
+@interface EaseRedBagCell()
+@property (nonatomic) RedpacketView *redpacketView;
+@end
 @implementation EaseRedBagCell
 
 #pragma mark - IModelCell
@@ -23,6 +27,7 @@
     if (self) {
         self.hasRead.hidden = YES;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
+        [self.bubbleView.backgroundImageView addSubview: self.redpacketView];
     }
     
     return self;
@@ -62,19 +67,10 @@
     _bubbleView.translatesAutoresizingMaskIntoConstraints = YES;
     if (model.isSender) {
         _bubbleView.frame = CGRectMake([UIScreen mainScreen].bounds.size.width - 273.5, 2, 213, 94);
-        self.bubbleView.redpacketIcon.frame = CGRectMake(13, 19, 26, 34);
-        self.bubbleView.redpacketTitleLabel.frame = CGRectMake(48, 19, 156, 15);
-        self.bubbleView.redpacketSubLabel.frame = CGRectMake(48, 41, 51, 12);
-        self.bubbleView.redpacketNameLabel.frame = CGRectMake(13, 73, 200, 20);
-        self.bubbleView.redpacketMemberLable.frame = CGRectMake(145, 73, 80, 20);
-    }else{
+    }else {
         _bubbleView.frame = CGRectMake(55, 2, 213, 94);
-        self.bubbleView.redpacketIcon.frame = CGRectMake(20, 19, 26, 34);
-        self.bubbleView.redpacketTitleLabel.frame = CGRectMake(55, 19, 156, 15);
-        self.bubbleView.redpacketSubLabel.frame = CGRectMake(55, 41, 51, 12);
-        self.bubbleView.redpacketNameLabel.frame = CGRectMake(20, 73, 200, 20);
-        self.bubbleView.redpacketMemberLable.frame = CGRectMake(152, 73, 80, 20);
     }
+    
 }
 
 + (NSString *)cellIdentifierWithModel:(id<IMessageModel>)model
@@ -84,48 +80,25 @@
 
 + (CGFloat)cellHeightWithModel:(id<IMessageModel>)model
 {
-    return 120;
+    return [RedpacketView redpacketViewHeight]+20;
 }
 
 - (void)setModel:(id<IMessageModel>)model
 {
     [super setModel:model];
-    
-    NSDictionary *dict = model.message.ext;
-    
-    NSString *str = [NSString stringWithFormat:@"%@",[dict valueForKey:RedpacketKeyRedpacketGreeting]];
-    if (str.length > 10) {
-        str = [str substringToIndex:8];
-        str = [str stringByAppendingString:@"..."];
-        self.bubbleView.redpacketTitleLabel.text = str;
-    }else
-    {
-        self.bubbleView.redpacketTitleLabel.text = [dict valueForKey:RedpacketKeyRedpacketGreeting];
-    }
-    
-    self.bubbleView.redpacketSubLabel.text = @"查看红包";
-    self.bubbleView.redpacketNameLabel.text = [dict valueForKey:RedpacketKeyRedpacketOrgName];
-    if ([[dict valueForKey:RedpacketKeyRedapcketToAnyone] isEqualToString:@"member"]) {
-        self.bubbleView.redpacketMemberLable.text = @"专属红包";
-    }else
-    {
-        self.bubbleView.redpacketMemberLable.text = @"";
-    }
-    _hasRead.hidden = YES;//红包消息不显示已读
-    _nameLabel = nil;// 不显示姓名
-    
+    [_redpacketView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext] andRedpacketDic:model.message.ext];
+    /** 红包消息不显示已读 */
+    _hasRead.hidden = YES;
+    /** 不显示姓名 */
+    _nameLabel = nil;
 }
 
-- (void)layoutSubviews
+- (RedpacketView *)redpacketView
 {
-    [super layoutSubviews];
-    
-    NSString *imageName = self.model.isSender ? @"RedpacketCellResource.bundle/redpacket_sender_bg" : @"RedpacketCellResource.bundle/redpacket_receiver_bg";
-    UIImage *image = self.model.isSender ? [[UIImage imageNamed:imageName] stretchableImageWithLeftCapWidth:30 topCapHeight:35] :
-    [[UIImage imageNamed:imageName] stretchableImageWithLeftCapWidth:20 topCapHeight:35];
-    
-    self.bubbleView.backgroundImageView.image = image;
+    if (!_redpacketView) {
+        _redpacketView = [[RedpacketView alloc]init];
+    }
+    return _redpacketView;
 }
-
 
 @end

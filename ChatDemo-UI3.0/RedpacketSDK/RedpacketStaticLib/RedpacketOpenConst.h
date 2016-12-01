@@ -14,7 +14,11 @@
 
 /**
  *  取消支付的通知
+<<<<<<< HEAD
  */
+=======
+ */ 
+>>>>>>> c274304e4a1b5a83f00f1dbb2ec62caac9cad7e7
 UIKIT_EXTERN NSString *const RedpacketCancelPayNotifaction;
 
 /**
