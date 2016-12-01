@@ -234,7 +234,7 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
     [self sendTextMessage:message withExt:dic];
 }
 
-/** 发送红包被抢的消息 */
+#pragma mark -  发送红包被抢的消息
 - (void)sendRedpacketHasBeenTaked:(RedpacketMessageModel *)messageModel
 {
     NSString *text = nil;

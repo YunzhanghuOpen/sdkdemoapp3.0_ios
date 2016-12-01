@@ -98,8 +98,13 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
         NSLog(@"用户还未登录");
         return;
     }
-    RedpacketRegisitModel *model = [RedpacketRegisitModel easeModelWithAppKey:_dealerAppKey appToken:userToken andAppUserId:userId];
-    fetchBlock(model);
+    if (userToken) {
+        RedpacketRegisitModel *model = [RedpacketRegisitModel easeModelWithAppKey:_dealerAppKey appToken:userToken andAppUserId:userId];
+        fetchBlock(model);
+    }else {
+        fetchBlock(nil);
+    }
+    
 }
 
 #pragma mark - HandleCmdMessage
@@ -116,7 +121,7 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
 
 -(void)didReceiveCmdMessage:(EMMessage *)message
 {
-    /** 收到红包被抢的 */
+    /** 收到红包被抢的消息 */
     EMCommandMessageBody * body = (EMCommandMessageBody *)message.messageBodies[0];
     if ([body.action isEqualToString:RedpacketKeyRedapcketCmd]) {
         [self handleCmdMessage:message];
