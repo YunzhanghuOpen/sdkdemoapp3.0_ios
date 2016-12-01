@@ -8,7 +8,6 @@
 
 
 
-#import "EaseBubbleView+RedPacket.h"
 #import "EaseBaseMessageCell.h"
 
 

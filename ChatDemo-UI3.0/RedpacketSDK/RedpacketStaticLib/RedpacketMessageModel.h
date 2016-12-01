@@ -10,12 +10,14 @@
 #import "RedpacketOpenConst.h"
 
 typedef NS_ENUM(NSInteger, RedpacketMessageType) {
+
     RedpacketMessageTypeRedpacket = 1001,           /***  红包消息*/
     RedpacketMessageTypeTedpacketTakenMessage,      /***  红包被抢的消息*/
     RedpacketMessageTypeTransfer                    /***  转账消息*/
 };
 
 typedef NS_ENUM(NSInteger, RedpacketType) {
+    
     RedpacketTypeSingle = 2001,     /***  点对点红包*/
     RedpacketTypeGroup,             /***  群组红包 (暂时留存)*/
     RedpacketTypeRand,              /***  拼手气红包*/
@@ -32,6 +34,7 @@ typedef NS_ENUM(NSInteger, RedpacketStatusType) {
     RedpacketStatusTypeCanGrab = 0,         /***  红包可以抢*/
     RedpacketStatusTypeGrabFinish = 1,      /***  红包被抢完*/
     RedpacketStatusTypeOutDate = -1         /***  红包已过期*/
+
 };
 
 @interface RedpacketUserInfo : NSObject <NSCopying>

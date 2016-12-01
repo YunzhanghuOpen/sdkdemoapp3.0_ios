@@ -9,11 +9,6 @@
 #ifndef YZHRedpacketBridgeProtocol_h
 #define YZHRedpacketBridgeProtocol_h
 
-#pragma mark - huawei change
-//  如果成功就传值，如果失败就传nil
-typedef void(^updateDkeyAndSessionIDBlock)(NSString *dKey, NSString *sessionID, NSError *error);
-
-#pragma mark - huawei end
 
 @class RedpacketRegisitModel;
 
@@ -24,7 +19,7 @@ typedef void (^FetchRegisitParamBlock)(RedpacketRegisitModel *model);
 
 @protocol YZHRedpacketBridgeDataSource <NSObject>
 
-/** 主动获取当前登录的用户信息 */
+/** 主动获取App用户的用户信息 */
 - (RedpacketUserInfo *)redpacketUserInfo;
 
 @end
@@ -42,9 +37,6 @@ typedef void (^FetchRegisitParamBlock)(RedpacketRegisitModel *model);
   * 如果错误error不为空， 1. 如果是环信IM，则刷新环信ImToken 2.如果是签名方式， 则刷新签名.
  */
 - (void)redpacketFetchRegisitParam:(FetchRegisitParamBlock)fetchBlock withError:(NSError *)error;
-
-//  更新Dkey 和 sessionID的回调 （请尽量保证成功）
-- (void)redpacketUpdateDkeyAndSessionID:(updateDkeyAndSessionIDBlock)updateBlock;
 
 @end
 
