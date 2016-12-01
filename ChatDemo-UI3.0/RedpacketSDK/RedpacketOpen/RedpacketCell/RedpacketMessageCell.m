@@ -44,7 +44,6 @@
 - (void)setModel:(id<IMessageModel>)model
 {
     _model = model;
-    
     /*-------为了兼容红包2.0版本--------*/
     NSString *text = model.text;
     if (model.bodyType == eMessageBodyType_Text) {
@@ -55,10 +54,15 @@
         BOOL isReceiver = [receiverId isEqualToString:currentUserId];
         if (isReceiver) {
             NSString *sender = [dict valueForKey:RedpacketKeyRedpacketSenderNickname];
+            NSString *senderID = [dict valueForKey:RedpacketKeyRedpacketSenderId];
             if (sender.length == 0) {
-                sender = [dict valueForKey:RedpacketKeyRedpacketSenderId];
+                sender = senderID;
             }
-            text = [NSString stringWithFormat:@"你领取了%@的红包", sender];
+            if ([senderID isEqualToString:receiverId]) {
+                text = [NSString stringWithFormat:@"你领取了自己的红包"];
+            }else {
+                text = [NSString stringWithFormat:@"你领取了%@的红包", sender];
+            }
         }else {
             NSString *receiver = [dict valueForKey:RedpacketKeyRedpacketReceiverNickname];
             if (receiver.length == 0) {

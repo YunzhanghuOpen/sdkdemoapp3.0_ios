@@ -244,6 +244,7 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
     NSMutableDictionary *dict = [messageModel.redpacketMessageModelToDic mutableCopy];
     /** 当前用户的用户ID */
     NSString *currentUserId = [[[[EaseMob sharedInstance] chatManager] loginInfo] objectForKey:kSDKUsername];
+    NSString *sender = messageModel.redpacketSender.userNickname;
     if (self.conversation.conversationType == eConversationTypeChat) {
         /** 忽略推送 */
         [dict setValue:@(YES) forKey:@"em_ignore_notification"];
@@ -251,18 +252,20 @@ shouldSendHasReadAckForMessage:(EMMessage *)message
         if (receiver.length > 18) {
             receiver = [[receiver substringToIndex:18] stringByAppendingString:@"..."];
         }
-        text = [NSString stringWithFormat:@"%@领取了你的红包", receiver];
+        text = [NSString stringWithFormat:@"你领取了%@的红包", sender];
         [self sendTextMessage:text withExt:dict];
     }else {
         if ([messageModel.redpacketSender.userId isEqualToString:currentUserId]) {
             text = @"你领取了自己的红包";
         }else {
-            NSString *sender = messageModel.redpacketSender.userNickname;
             if (sender.length > 18) {
                sender = [[sender substringToIndex:18] stringByAppendingString:@"..."];
             }
-            text = [NSString stringWithFormat:@"你领取了%@的红包", sender];
-            [[EaseMob sharedInstance].chatManager asyncSendMessage:[self createCmdMessageWithModel:messageModel] progress:nil];
+            if (messageModel.isRedacketSender) {
+                text = [NSString stringWithFormat:@"你领取了自己的红包"];
+            }else {
+                text = [NSString stringWithFormat:@"你领取了%@的红包", sender];
+            }            [[EaseMob sharedInstance].chatManager asyncSendMessage:[self createCmdMessageWithModel:messageModel] progress:nil];
         }
         EMMessage *redpacketGroupMessage = [self createTextMessageWithText:text receiver:self.conversation.chatter andExt:dict];
         [self addMessageToDataSource:redpacketGroupMessage progress:nil];

@@ -18,7 +18,6 @@
 
 @property (nonatomic, strong) RedpacketView *redpacketView;
 @property (nonatomic, strong) RedPacketLuckView *repacketLuckView;
-@property (nonatomic, strong) RedpacketMessageModel *redpacketMessageModel;
 
 @end
 
@@ -33,8 +32,8 @@
     if (self) {
         self.hasRead.hidden = YES;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
-        _redpacketMessageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
-        if (_redpacketMessageModel.redpacketType == RedpacketTypeAmount) {
+        RedpacketMessageModel *messageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
+        if (messageModel.redpacketType == RedpacketTypeAmount) {
             [self.bubbleView.backgroundImageView addSubview:self.repacketLuckView];
         }else {
             [self.bubbleView.backgroundImageView addSubview: self.redpacketView];
@@ -66,15 +65,15 @@
 - (void)updateCustomBubbleViewMargin:(UIEdgeInsets)bubbleMargin model:(id<IMessageModel>)model
 {
     _bubbleView.translatesAutoresizingMaskIntoConstraints = YES;
-    
+    RedpacketMessageModel *messageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
     if (model.isSender) {
-        if (_redpacketMessageModel.redpacketType == RedpacketTypeAmount) {
+        if (messageModel.redpacketType == RedpacketTypeAmount) {
             _bubbleView.frame = CGRectMake([UIScreen mainScreen].bounds.size.width - 175, 8, 116, 140);
         }else {
             _bubbleView.frame = CGRectMake([UIScreen mainScreen].bounds.size.width - 273.5, 2, 213, 94);
         }
     }else {
-        if (_redpacketMessageModel.redpacketType == RedpacketTypeAmount) {
+        if (messageModel.redpacketType == RedpacketTypeAmount) {
             _bubbleView.frame = CGRectMake(55, 8, 116, 140);
         }else {
             _bubbleView.frame = CGRectMake(55, 2, 213, 94);
@@ -100,7 +99,8 @@
 - (void)setModel:(id<IMessageModel>)model
 {
     [super setModel:model];
-    if (_redpacketMessageModel.redpacketType == RedpacketTypeAmount) {
+    RedpacketMessageModel *messageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
+    if (messageModel.redpacketType == RedpacketTypeAmount) {
         [_repacketLuckView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext]];
     }else {
         [_redpacketView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext]

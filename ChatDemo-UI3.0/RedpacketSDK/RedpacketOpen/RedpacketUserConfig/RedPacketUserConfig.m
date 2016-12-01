@@ -209,7 +209,11 @@ static RedPacketUserConfig *__sharedConfig__ = nil;
         if (sender.length == 0) {
             sender = [dict valueForKey:RedpacketKeyRedpacketSenderId];
         }
-        text = [NSString stringWithFormat:@"你领取了%@的红包", sender];
+        if ([message.from isEqualToString:receiverId]) {
+            text = [NSString stringWithFormat:@"你领取了自己的红包"];
+        }else {
+            text = [NSString stringWithFormat:@"你领取了%@的红包", sender];
+        }
     }else {
         NSString *receiver = [dict valueForKey:RedpacketKeyRedpacketReceiverNickname];
         if (receiver.length == 0) {
