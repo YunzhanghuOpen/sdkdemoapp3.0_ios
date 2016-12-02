@@ -12,7 +12,6 @@
 #import "RedpacketView.h"
 #import "RedPacketLuckView.h"
 #import "RedpacketMessageModel.h"
-#import "RedpacketMessageModel.h"
 
 @interface EaseRedBagCell()
 
