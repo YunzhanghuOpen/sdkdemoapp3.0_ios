@@ -82,7 +82,12 @@
 
 + (NSString *)cellIdentifierWithModel:(id<IMessageModel>)model
 {
-    return model.isSender ? @"__redPacketCellSendIdentifier__" : @"__redPacketCellReceiveIdentifier__";
+    RedpacketMessageModel *messageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
+    if (messageModel.redpacketType == RedpacketTypeAmount) {
+        return model.isSender ? @"__redPacketLuckCellSendIdentifier__" : @"__redPacketLuckCellReceiveIdentifier__";
+    }else {
+        return model.isSender ? @"__redPacketCellSendIdentifier__" : @"__redPacketCellReceiveIdentifier__";
+    }
 }
 
 + (CGFloat)cellHeightWithModel:(id<IMessageModel>)model
