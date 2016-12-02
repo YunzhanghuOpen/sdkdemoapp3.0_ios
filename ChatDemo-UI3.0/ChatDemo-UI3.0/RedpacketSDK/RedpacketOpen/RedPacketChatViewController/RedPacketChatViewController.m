@@ -154,7 +154,7 @@
                    withCellWidth:(CGFloat)cellWidth
 {
     NSDictionary *ext = messageModel.message.ext;
-    if ([RedpacketMessageModel isRedpacket:ext])    {
+    if ([RedpacketMessageModel isRedpacket:ext] || [RedpacketMessageModel isRedpacketTransferMessage:ext])    {
         return [EaseRedBagCell cellHeightWithModel:messageModel];
     }else if ([RedpacketMessageModel isRedpacketTakenMessage:ext]) {
         return 36;

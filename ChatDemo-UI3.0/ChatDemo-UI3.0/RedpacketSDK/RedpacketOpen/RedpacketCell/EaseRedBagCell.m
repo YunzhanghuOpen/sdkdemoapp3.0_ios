@@ -28,12 +28,6 @@
     if (self) {
         self.hasRead.hidden = YES;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
-        RedpacketMessageModel *messageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
-        if (messageModel.redpacketType == RedpacketTypeAmount) {
-            [self.bubbleView.backgroundImageView addSubview:self.repacketLuckView];
-        }else {
-            [self.bubbleView.backgroundImageView addSubview: self.redpacketView];
-        }
     }
     
     return self;
@@ -86,7 +80,12 @@
 
 + (NSString *)cellIdentifierWithModel:(id<IMessageModel>)model
 {
-    return model.isSender ? @"__redPacketCellSendIdentifier__" : @"__redPacketCellReceiveIdentifier__";
+    RedpacketMessageModel *messageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
+    if (messageModel.redpacketType == RedpacketTypeAmount) {
+        return model.isSender ? @"__redPacketLuckCellSendIdentifier__" : @"__redPacketLuckCellReceiveIdentifier__";
+    }else {
+        return model.isSender ? @"__redPacketCellSendIdentifier__" : @"__redPacketCellReceiveIdentifier__";
+    }
 }
 
 + (CGFloat)cellHeightWithModel:(id<IMessageModel>)model
@@ -103,9 +102,15 @@
     [super setModel:model];
     RedpacketMessageModel *messageModel = [RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext];
     if (messageModel.redpacketType == RedpacketTypeAmount) {
+        [_redpacketView removeFromSuperview];
+        _redpacketView = nil;
+        [self.bubbleView.backgroundImageView addSubview:self.repacketLuckView];
         [_repacketLuckView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext]];
     }else {
-        [_redpacketView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext]
+        [_repacketLuckView removeFromSuperview];
+        _repacketLuckView = nil;
+        [self.bubbleView.backgroundImageView addSubview: self.redpacketView];
+                [_redpacketView configWithRedpacketMessageModel:[RedpacketMessageModel redpacketMessageModelWithDic:model.message.ext]
                                         andRedpacketDic:model.message.ext];
     }
     /** 红包消息不显示已读 */
