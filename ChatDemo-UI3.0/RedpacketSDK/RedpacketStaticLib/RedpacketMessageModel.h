@@ -9,6 +9,13 @@
 #import <Foundation/Foundation.h>
 #import "RedpacketOpenConst.h"
 
+@class RedpacketMessageModel;
+@protocol RedpacketMessagePrivateProtocol <NSObject>
+
++ (RedpacketMessageModel *)modelWithCheckResult:(NSDictionary *)dict;
+
+@end
+
 typedef NS_ENUM(NSInteger, RedpacketMessageType) {
 
     RedpacketMessageTypeRedpacket = 1001,           /***  红包消息*/
@@ -73,10 +80,6 @@ typedef NS_ENUM(NSInteger, RedpacketStatusType) {
  *  红包个数
  */
 @property (nonatomic, assign) NSInteger redpacketCount;
-/**
- *  定向红包，红包接收者ID
- */
-@property (nonatomic, copy) NSString *toReceiverDuid;
 
 @property (nonatomic, copy) NSString *redpacketGreeting;
 @property (nonatomic, copy) NSString *redpacketOrgName;
@@ -91,12 +94,12 @@ typedef NS_ENUM(NSInteger, RedpacketStatusType) {
 /**
  *  红包消息
  */
-@interface RedpacketMessageModel : NSObject <NSCopying>
+@interface RedpacketMessageModel : NSObject <NSCopying, RedpacketMessagePrivateProtocol>
 
 /**
- *  当前聊天窗口(环信Cmd消息透传时传递当前会话窗口)
+ *  群聊天窗口ID,如果groupID为"",则视为单聊
  */
-@property (nonatomic, copy) NSString *conversationID;
+@property (nonatomic, copy) NSString *groupID;
 
 /**
  *  红包ID
@@ -142,11 +145,6 @@ typedef NS_ENUM(NSInteger, RedpacketStatusType) {
  *  红包接受者信息
  */
 @property (nonatomic, strong) RedpacketUserInfo *redpacketReceiver;
-
-/**
- *  专属红包接收者消息
- */
-@property (nonatomic, strong) RedpacketUserInfo *toRedpacketReceiver;
 
 /**
  *  红包视图相关信息
