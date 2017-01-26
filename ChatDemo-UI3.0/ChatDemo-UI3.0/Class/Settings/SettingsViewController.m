@@ -141,7 +141,7 @@
 #ifdef REDPACKET_AVALABLE
     //  TODO: RedpacketBegin
     if (indexPath.section == 0) {
-        cell.textLabel.text = @"零钱";
+        cell.textLabel.text = @"红包记录";
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         
     }else if (indexPath.section == 1) {
@@ -227,14 +227,8 @@
 #ifdef REDPACKET_AVALABLE
     //  TODO: Redpacket
     if (indexPath.section == 0) {
-        // 零钱页面
-        UIViewController *changeController = [RedpacketViewControl changeMoneyController];
-        
-        //弹出方式
-        UINavigationController *nav = [[UINavigationController alloc]initWithRootViewController:changeController];
-        [self presentViewController:nav animated:YES completion:^{
-            
-        }];
+        // 红包记录页面
+        [RedpacketViewControl presentChangePocketViewControllerFromeController:self];
         return;
     }
 #endif
