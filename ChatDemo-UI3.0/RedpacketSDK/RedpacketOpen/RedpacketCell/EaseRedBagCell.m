@@ -8,7 +8,6 @@
 
 #import "EaseRedBagCell.h"
 #import "RedpacketOpenConst.h"
-#import "UIImageView+EMWebCache.h"
 #import "RedpacketView.h"
 #import "RedPacketLuckView.h"
 #import "RedpacketMessageModel.h"

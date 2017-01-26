@@ -68,12 +68,8 @@
 {
     NSString *message;
     if (redpacketModel.isRedacketSender) {
-        NSString *currentUserId = [[[[EaseMob sharedInstance] chatManager] loginInfo] objectForKey:kSDKUsername];
-        if ([redpacketModel.redpacketReceiver.userId isEqualToString:redpacketModel.redpacketSender.userId] && [currentUserId isEqualToString:redpacketModel.redpacketSender.userId]) {
-            message = @"你领取了自己的红包";
-        }else {
-            message = [NSString stringWithFormat:@"%@领取了你的红包", redpacketModel.redpacketReceiver.userNickname];
-        }
+        message = [NSString stringWithFormat:@"%@领取了你的红包", redpacketModel.redpacketReceiver.userNickname];
+       
     }else {
         message = [NSString stringWithFormat:@"你领取了%@的红包", redpacketModel.redpacketSender.userNickname];
     }
