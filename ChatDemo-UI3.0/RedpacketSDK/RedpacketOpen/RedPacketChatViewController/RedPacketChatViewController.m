@@ -20,13 +20,13 @@
 
 /** 红包聊天窗口 */
 @interface RedPacketChatViewController () < EaseMessageCellDelegate,
-                                            EaseMessageViewControllerDataSource
+                                            EaseMessageViewControllerDataSource,
+                                            EMGroupManagerDelegate
                                             >
 
 @end
 
 @implementation RedPacketChatViewController
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -44,7 +44,6 @@
 
     
     [RedPacketUserConfig sharedConfig].chatVC = self;
-    
 }
 
 /** 根据userID获得用户昵称,和头像地址 */
@@ -147,7 +146,7 @@
 - (void)messageViewController:(EaseMessageViewController *)viewController didSelectMoreView:(EaseChatBarMoreView *)moreView AtIndex:(NSInteger)index
 {
     __weak typeof(self) weakSelf = self;
-    RPRedpacketControllerType  redpacketVCType;
+    RPRedpacketControllerType  redpacketVCType = 0;
     RedpacketUserInfo *userInfo = [RedpacketUserInfo new];
     userInfo = [self profileEntityWith:self.conversation.conversationId];
     NSArray *groupArray = [EMGroup groupWithId:self.conversation.conversationId].occupants;
@@ -163,32 +162,33 @@
             redpacketVCType = RPRedpacketControllerTypeGroup;
             
         }
-    }
-    
-    /** 发红包方法*/
-    [RedpacketViewControl presentRedpacketViewController:redpacketVCType
-                                         fromeController:self
-                                        groupMemberCount:groupArray.count
-                                   withRedpacketReceiver:userInfo
-                                         andSuccessBlock:^(RedpacketMessageModel *model) {
-        
-        [weakSelf sendRedPacketMessage:model];
-        
-    } withFetchGroupMemberListBlock:^(RedpacketMemberListFetchBlock completionHandle) {
-        /** 定向红包群成员列表页面，获取群成员列表 */
-        EMGroup *group = [[[EMClient sharedClient] groupManager] getGroupSpecificationFromServerWithId:self.conversation.conversationId
-                                                                                                 error:nil];
-        NSMutableArray *mArray = [[NSMutableArray alloc] init];
-        for (NSString *username in group.occupants) {
-            /** 创建群成员用户 */
-            RedpacketUserInfo *userInfo = [self profileEntityWith:username];
-            [mArray addObject:userInfo];
-        }
-        
-        completionHandle(mArray);
-        
-    } andGenerateRedpacketIDBlock:nil];
+        /** 发红包方法*/
+        [RedpacketViewControl presentRedpacketViewController:redpacketVCType
+                                             fromeController:self
+                                            groupMemberCount:groupArray.count
+                                       withRedpacketReceiver:userInfo
+                                             andSuccessBlock:^(RedpacketMessageModel *model) {
+                                                 [weakSelf sendRedPacketMessage:model];
+                                             } withFetchGroupMemberListBlock:^(RedpacketMemberListFetchBlock completionHandle) {
+                                                 /** 定向红包群成员列表页面，获取群成员列表 */
+                                                 EMError *error = nil;
+                                                 EMGroup *group = [[[EMClient sharedClient] groupManager] getGroupSpecificationFromServerWithId:self.conversation.conversationId error:&error];
+                                                 if (error) {
+                                                     completionHandle(nil);
+                                                 } else {
+                                                     EMCursorResult *result = [[EMClient sharedClient].groupManager getGroupMemberListFromServerWithId:self.conversation.conversationId cursor:nil pageSize:group.occupantsCount error:&error];
+                                                     NSMutableArray *mArray = [[NSMutableArray alloc] init];
+                                                     for (NSString *username in result.list) {
+                                                         /** 创建群成员用户 */
+                                                         RedpacketUserInfo *userInfo = [self profileEntityWith:username];
+                                                         [mArray addObject:userInfo];
+                                                     }
+                                                     [mArray addObject:[self profileEntityWith:group.owner]];
+                                                     completionHandle(mArray);
+                                                 }
+                                             } andGenerateRedpacketIDBlock:nil];
 
+    }
 }
 
 /** 发送红包消息*/
